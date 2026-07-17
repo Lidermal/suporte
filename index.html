@@ -30,13 +30,12 @@
         body {
             background-color: var(--dark-blue);
             color: var(--white);
-            height: 100vh;
-            overflow-x: hidden;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
 
-        /* TELA DE LOGIN */
+        /* --- TELA DE LOGIN & PRIMEIRO ACESSO --- */
         #login-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle at center, #112240 0%, #020c1b 100%);
@@ -58,81 +57,47 @@
         }
 
         .logo-img {
-            width: 180px;
-            height: auto;
-            margin-bottom: 1.5rem;
+            width: 180px; height: auto; margin-bottom: 1.5rem;
             filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.3));
         }
 
-        .input-group {
-            position: relative;
-            margin-bottom: 1.5rem;
-            text-align: left;
-        }
-
+        .input-group { margin-bottom: 1.5rem; text-align: left; }
         .input-group label {
-            display: block;
-            font-size: 0.8rem;
-            color: var(--accent-cyan);
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            letter-spacing: 1px;
+            display: block; font-size: 0.8rem; color: var(--accent-cyan);
+            margin-bottom: 0.5rem; font-weight: 600; letter-spacing: 1px;
         }
-
         .input-group input, .input-group select {
-            width: 100%;
-            padding: 12px 15px;
-            background: rgba(2, 12, 27, 0.8);
-            border: 1px solid #233554;
-            border-radius: 8px;
-            color: var(--white);
-            font-size: 1rem;
-            transition: all 0.3s;
+            width: 100%; padding: 12px 15px; background: rgba(2, 12, 27, 0.8);
+            border: 1px solid #233554; border-radius: 8px; color: var(--white);
+            font-size: 1rem; transition: all 0.3s;
         }
-
-        .input-group input:focus, .input-group select:focus {
-            outline: none;
-            border-color: var(--accent-cyan);
+        .input-group input:focus {
+            outline: none; border-color: var(--accent-cyan);
             box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
         }
 
         .btn-login {
-            width: 100%;
-            padding: 14px;
+            width: 100%; padding: 14px;
             background: linear-gradient(90deg, var(--primary-blue), #007bff);
-            border: none;
-            border-radius: 8px;
-            color: white;
-            font-weight: bold;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            border: none; border-radius: 8px; color: white;
+            font-weight: bold; font-size: 1rem; cursor: pointer;
+            transition: transform 0.2s; text-transform: uppercase; letter-spacing: 1px;
         }
-
-        .btn-login:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(0, 86, 179, 0.4);
-        }
-
+        .btn-login:hover:not(:disabled) { transform: translateY(-2px); }
         .btn-login:disabled { opacity: 0.7; cursor: not-allowed; }
 
-        /* APP PRINCIPAL */
-        #app-container { display: none; height: 100%; flex-direction: column; }
+        /* --- APP PRINCIPAL --- */
+        #app-container { display: none; height: 100vh; flex-direction: column; }
 
         header {
-            background: rgba(10, 25, 47, 0.95);
-            padding: 1rem 1.5rem;
+            background: rgba(10, 25, 47, 0.95); padding: 1rem 1.5rem;
             display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid #233554;
-            backdrop-filter: blur(5px);
+            border-bottom: 1px solid #233554; backdrop-filter: blur(5px);
         }
-
         .header-logo img { height: 40px; }
-        
         .nav-actions i {
-            font-size: 1.2rem; margin-left: 1.5rem; cursor: pointer; color: var(--text-grey); transition: 0.3s;
+            font-size: 1.2rem; margin-left: 1.5rem; cursor: pointer;
+            color: var(--text-grey); transition: 0.3s;
         }
         .nav-actions i:hover { color: var(--accent-cyan); }
 
@@ -140,56 +105,45 @@
 
         /* Dashboard Cards */
         .dashboard-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem; margin-bottom: 2.5rem;
         }
-
         .stat-card {
-            background: var(--card-bg);
-            padding: 1.5rem;
-            border-radius: 12px;
+            background: var(--card-bg); padding: 1.5rem; border-radius: 12px;
             border-left: 4px solid var(--accent-cyan);
             box-shadow: 0 10px 30px -10px rgba(2,12,27,0.7);
         }
-
-        .stat-card h3 { font-size: 0.85rem; color: var(--text-grey); text-transform: uppercase; letter-spacing: 1px; }
-        .stat-card .value { font-size: 2rem; font-weight: 700; margin-top: 0.5rem; color: var(--white); }
+        .stat-card h3 { font-size: 0.85rem; color: var(--text-grey); text-transform: uppercase; }
+        .stat-card .value { font-size: 2rem; font-weight: 700; margin-top: 0.5rem; }
 
         .action-card {
             background: linear-gradient(135deg, var(--primary-blue), #003d80);
             display: flex; align-items: center; justify-content: space-between;
             cursor: pointer; transition: 0.3s; border: none;
         }
-        .action-card:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(0, 86, 179, 0.5); }
-        .action-card h3 { color: white; margin: 0; }
-        .action-card i { font-size: 2rem; color: rgba(255,255,255,0.8); }
+        .action-card:hover { transform: scale(1.02); }
 
         /* Sistema de Pastas */
-        .section-title { 
-            margin-bottom: 1rem; color: var(--accent-cyan); font-size: 1.2rem; 
-            display: flex; align-items: center; gap: 10px; 
+        .section-title {
+            margin-bottom: 1rem; color: var(--accent-cyan); font-size: 1.2rem;
+            display: flex; align-items: center; gap: 10px;
         }
-        
         .folder-grid {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 1.5rem;
         }
-
         .folder-item {
             display: flex; flex-direction: column; align-items: center; cursor: pointer;
         }
-
         .folder-icon {
             font-size: 3.5rem; color: var(--warning); margin-bottom: 0.5rem;
             transition: 0.3s; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
         }
         .folder-item:hover .folder-icon { transform: translateY(-5px); color: #ffed4a; }
-
         .folder-name {
-            font-size: 0.85rem; font-weight: 600; text-align: center; word-break: break-word; color: var(--white);
+            font-size: 0.85rem; font-weight: 600; text-align: center;
+            word-break: break-word; color: var(--white);
         }
-
-        .status-dot {
-            width: 8px; height: 8px; border-radius: 50%; margin-top: 5px;
-        }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; }
         .status-pending { background: var(--warning); box-shadow: 0 0 8px var(--warning); }
         .status-sent { background: var(--accent-cyan); box-shadow: 0 0 8px var(--accent-cyan); }
         .status-approved { background: var(--success); box-shadow: 0 0 8px var(--success); }
@@ -197,27 +151,28 @@
         /* Modal / Planilha */
         .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(2, 12, 27, 0.9); z-index: 2000; justify-content: center; align-items: center;
-            backdrop-filter: blur(5px);
+            background: rgba(2, 12, 27, 0.9); z-index: 2000;
+            justify-content: center; align-items: center; backdrop-filter: blur(5px);
         }
-
         .modal-content {
-            background: #112240; width: 95%; max-width: 900px; height: 90%; border-radius: 12px;
-            display: flex; flex-direction: column; overflow: hidden; border: 1px solid #233554;
+            background: #112240; width: 95%; max-width: 900px; height: 90%;
+            border-radius: 12px; display: flex; flex-direction: column;
+            overflow: hidden; border: 1px solid #233554;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
-
         .modal-header {
             padding: 1.2rem; background: #0a192f; border-bottom: 1px solid #233554;
             display: flex; justify-content: space-between; align-items: center;
         }
         .modal-header h3 { color: var(--accent-cyan); font-family: 'Courier New', monospace; }
-
         .modal-body { flex: 1; overflow-y: auto; padding: 1.5rem; }
 
         /* Tabela Tech */
         table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.9rem; }
-        th { background: #0a192f; color: var(--accent-cyan); padding: 12px; text-align: left; font-weight: 600; border-bottom: 2px solid #233554; }
+        th {
+            background: #0a192f; color: var(--accent-cyan); padding: 12px;
+            text-align: left; font-weight: 600; border-bottom: 2px solid #233554;
+        }
         td { border-bottom: 1px solid #233554; padding: 10px; color: var(--text-grey); }
         tr:hover td { background: rgba(255,255,255,0.02); color: var(--white); }
         
@@ -243,28 +198,60 @@
             th, td { padding: 6px; }
             .admin-form-grid { grid-template-columns: 1fr; }
         }
+
+        /* --- ESTILOS DE IMPRESSÃO --- */
+        @media print {
+            body { background: white; color: black; height: auto; overflow: visible; }
+            #login-screen, header, .nav-actions, .action-card, .btn-login, 
+            .modal-header i, #admin-panel, .section-title i { display: none !important; }
+            
+            #app-container { display: block !important; height: auto; }
+            main { padding: 0; max-width: 100%; }
+            
+            .modal { 
+                position: static; display: block !important; background: white; 
+                backdrop-filter: none; height: auto; 
+            }
+            .modal-content { 
+                width: 100%; max-width: 100%; height: auto; border: none; 
+                box-shadow: none; background: white; color: black; overflow: visible;
+            }
+            .modal-header { background: white; border-bottom: 2px solid black; padding: 0; margin-bottom: 20px; }
+            .modal-header h3 { color: black; font-family: serif; font-size: 18pt; }
+            
+            table { border: 1px solid black; }
+            th, td { border: 1px solid black; color: black; padding: 8px; }
+            th { background: #eee; color: black; }
+            
+            .stat-card { border: 1px solid black; box-shadow: none; background: white; color: black; }
+            .stat-card h3, .stat-card .value { color: black; }
+            
+            input { border: none; background: transparent; color: black; padding: 0; }
+        }
     </style>
 </head>
 <body>
 
-    <!-- TELA DE LOGIN COM USUÁRIO E SENHA -->
+    <!-- TELA DE LOGIN / PRIMEIRO ACESSO -->
     <div id="login-screen">
         <div class="login-container">
             <img src="TI.png" alt="TI Claudino S/A" class="logo-img">
             
-            <div class="input-group">
-                <label>USUÁRIO</label>
-                <input type="text" id="username" placeholder="Ex: lemos, didi, douglas" autocomplete="off">
+            <div id="login-form">
+                <div class="input-group">
+                    <label>USUÁRIO</label>
+                    <input type="text" id="username" placeholder="Ex: lemos, didi, anna" autocomplete="off">
+                </div>
+                
+                <div class="input-group">
+                    <label>SENHA</label>
+                    <input type="password" id="password" placeholder="••••••••">
+                </div>
+                
+                <button class="btn-login" onclick="handleLogin()">
+                    <i class="fas fa-sign-in-alt"></i> Acessar Sistema
+                </button>
             </div>
-            
-            <div class="input-group">
-                <label>SENHA</label>
-                <input type="password" id="password" placeholder="••••••••">
-            </div>
-            
-            <button class="btn-login" onclick="handleLogin()">
-                <i class="fas fa-sign-in-alt"></i> Acessar Sistema
-            </button>
             
             <p style="margin-top: 1.5rem; font-size: 0.75rem; color: var(--text-grey);">
                 <i class="fas fa-shield-alt"></i> Acesso Restrito - TI Claudino S/A
@@ -286,7 +273,7 @@
 
         <main>
             <div id="dashboard-view">
-                <h2 style="margin-bottom: 1.5rem; color: var(--white);">Painel de Controle <span style="color:var(--accent-cyan)">// <span id="user-name">Usuário</span></span></h2>
+                <h2 style="margin-bottom: 1.5rem;">Painel de Controle <span style="color:var(--accent-cyan)">// <span id="user-name">Usuário</span></span></h2>
                 
                 <div class="dashboard-grid">
                     <div class="stat-card">
@@ -309,11 +296,9 @@
                 <div class="section-title">
                     <i class="fas fa-folder-open"></i> DIRETÓRIO DE VIAGENS
                 </div>
-                <div class="folder-grid" id="trips-folder-grid">
-                    <!-- Pastas geradas via JS -->
-                </div>
+                <div class="folder-grid" id="trips-folder-grid"></div>
 
-                <!-- PAINEL ADMINISTRATIVO (Só aparece para admins) -->
+                <!-- PAINEL ADMINISTRATIVO -->
                 <div id="admin-panel" style="display: none;">
                     <div class="section-title">
                         <i class="fas fa-users-cog"></i> GERENCIAMENTO DE EQUIPE
@@ -361,7 +346,10 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="modal-title">~/viagens/nova_registro</h3>
-                <i class="fas fa-times" style="cursor: pointer; color: var(--text-grey);" onclick="closeModal()"></i>
+                <div>
+                    <i class="fas fa-print" style="cursor: pointer; color: var(--text-grey); margin-right: 15px;" onclick="window.print()" title="Imprimir"></i>
+                    <i class="fas fa-times" style="cursor: pointer; color: var(--text-grey);" onclick="closeModal()"></i>
+                </div>
             </div>
             <div class="modal-body">
                 <div id="new-trip-form" style="max-width: 400px; margin: 2rem auto;">
@@ -372,7 +360,7 @@
 
                 <div id="spreadsheet-view" style="display: none;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                        <h4 style="color: var(--white);"><i class="fas fa-file-excel"></i> Planilha: <span id="current-store" style="color: var(--accent-cyan);"></span></h4>
+                        <h4><i class="fas fa-file-excel"></i> Planilha: <span id="current-store" style="color: var(--accent-cyan);"></span></h4>
                         <button onclick="submitTrip()" style="background: var(--success); color: #020c1b; border:none; padding: 8px 16px; border-radius: 4px; font-weight:bold; cursor:pointer;">
                             <i class="fas fa-paper-plane"></i> ENVIAR PARA LEMOS
                         </button>
@@ -429,55 +417,47 @@
             btn.disabled = true;
 
             try {
-                // Busca o email interno associado ao username
                 const { data: profile, error: searchError } = await supabase
                     .from('profiles')
                     .select('email, must_change_password')
                     .eq('username', usernameInput)
                     .single();
 
-                if (searchError || !profile) {
-                    throw new Error('Usuário não encontrado');
-                }
+                if (searchError || !profile) throw new Error('Usuário não encontrado');
 
-                // Usa o email interno para autenticar no Supabase Auth
                 const { data, error: authError } = await supabase.auth.signInWithPassword({
                     email: profile.email,
                     password: password
                 });
 
-                if (authError) {
-                    throw new Error('Senha incorreta');
-                }
+                if (authError) throw new Error('Senha incorreta');
 
                 currentUser = data.user;
                 
-                // VERIFICA SE É PRIMEIRO ACESSO
-                if (profile.must_change_password && password === TEMP_PASSWORD) {
-                    document.getElementById('login-screen').innerHTML = `
-                        <div class="login-container">
-                            <img src="logo.png" alt="TI Claudino S/A" class="logo-img">
-                            <h3 style="color:var(--accent-cyan); margin-bottom:1rem;">PRIMEIRO ACESSO</h3>
-                            <p style="font-size:0.85rem; color:var(--text-grey); margin-bottom:1.5rem;">
-                                Defina sua nova senha pessoal.<br>Esta senha não poderá ser recuperada por e-mail.
-                            </p>
-                            <div class="input-group">
-                                <label>NOVA SENHA</label>
-                                <input type="password" id="new-password" placeholder="Mínimo 6 caracteres">
-                            </div>
-                            <div class="input-group">
-                                <label>CONFIRME A SENHA</label>
-                                <input type="password" id="confirm-password" placeholder="Repita a senha">
-                            </div>
-                            <button class="btn-login" onclick="changeFirstPassword('${profile.email}')">
-                                DEFINIR SENHA
-                            </button>
+                // VERIFICAÇÃO UNIVERSAL DE PRIMEIRO ACESSO
+                if (profile.must_change_password === true && password === TEMP_PASSWORD) {
+                    document.getElementById('login-form').innerHTML = `
+                        <h3 style="color:var(--accent-cyan); margin-bottom:1rem;">PRIMEIRO ACESSO</h3>
+                        <p style="font-size:0.85rem; color:var(--text-grey); margin-bottom:1.5rem;">
+                            Olá, <strong>${usernameInput}</strong>.<br>
+                            Defina sua senha pessoal definitiva.<br>
+                            <span style="color:var(--warning)">Atenção: Não haverá recuperação por e-mail.</span>
+                        </p>
+                        <div class="input-group">
+                            <label>NOVA SENHA</label>
+                            <input type="password" id="new-password" placeholder="Mínimo 6 caracteres">
                         </div>
+                        <div class="input-group">
+                            <label>CONFIRME A SENHA</label>
+                            <input type="password" id="confirm-password" placeholder="Repita a senha">
+                        </div>
+                        <button class="btn-login" onclick="changeFirstPassword('${profile.email}')">
+                            DEFINIR SENHA PERMANENTE
+                        </button>
                     `;
-                    return; // Interrompe o carregamento do dashboard
+                    return;
                 }
 
-                // Login normal
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('app-container').style.display = 'flex';
                 loadUserData();
@@ -489,7 +469,6 @@
             }
         }
 
-        // Função para trocar senha no primeiro acesso
         async function changeFirstPassword(email) {
             const newPass = document.getElementById('new-password').value;
             const confirmPass = document.getElementById('confirm-password').value;
@@ -497,19 +476,17 @@
             if (newPass.length < 6) return alert('Senha deve ter no mínimo 6 caracteres');
             if (newPass !== confirmPass) return alert('As senhas não coincidem');
             
-            // Atualiza senha no Auth
             const { error } = await supabase.auth.updateUser({ password: newPass });
             
             if (error) {
                 alert('Erro ao atualizar senha: ' + error.message);
             } else {
-                // Remove flag de primeiro acesso
                 await supabase.from('profiles')
                     .update({ must_change_password: false })
                     .eq('email', email);
                     
                 alert('✅ Senha definida com sucesso! Redirecionando...');
-                location.reload(); // Recarrega para entrar normalmente
+                location.reload();
             }
         }
 
@@ -522,7 +499,6 @@
                 
             document.getElementById('user-name').innerText = profile.full_name || profile.username;
             
-            // Mostra painel admin apenas para coordenadores e gerente
             if (['gerente', 'coordenador'].includes(profile.role)) {
                 document.getElementById('admin-panel').style.display = 'block';
                 loadAllUsers();
@@ -604,7 +580,7 @@
             loadTrips();
         }
 
-        // GERAÇÃO DA PLANILHA
+        // GERAÇÃO DA PLANILHA E CÁLCULOS
         function generateTableRows() {
             const tbody = document.getElementById('table-body');
             tbody.innerHTML = '';
@@ -692,7 +668,6 @@
             
             if (!username || !name) return alert('Preencha username e nome');
 
-            // Gera email interno único
             const internalEmail = `${username}@ti-claudino.internal`;
 
             const { data, error } = await supabase.auth.admin.createUser({
@@ -717,7 +692,7 @@
                     full_name: name,
                     role: role,
                     team: team,
-                    must_change_password: true // Flag de primeiro acesso
+                    must_change_password: true
                 }]);
                 
                 alert(`✅ Usuário '${username}' criado!\n Senha inicial: ${TEMP_PASSWORD}\n O usuário deverá alterar no primeiro login.`);
