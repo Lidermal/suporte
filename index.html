@@ -35,6 +35,33 @@
             flex-direction: column;
         }
 
+        /* --- SISTEMA DE NOTIFICAÇÃO PERSONALIZADO (TOAST) --- */
+        #toast-container {
+            position: fixed; top: 20px; right: 20px; z-index: 9999;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .toast {
+            background: rgba(10, 25, 47, 0.95);
+            backdrop-filter: blur(10px);
+            border-left: 4px solid var(--accent-cyan);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex; align-items: center; gap: 12px;
+            min-width: 300px;
+            animation: slideIn 0.3s ease-out forwards;
+            border: 1px solid #233554;
+        }
+        .toast.error { border-left-color: var(--danger); }
+        .toast.success { border-left-color: var(--success); }
+        .toast i { font-size: 1.2rem; }
+        .toast.error i { color: var(--danger); }
+        .toast.success i { color: var(--success); }
+        .toast.info i { color: var(--accent-cyan); }
+        
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; transform: translateY(-10px); } }
+
         /* --- TELA DE LOGIN & PRIMEIRO ACESSO --- */
         #login-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -203,7 +230,7 @@
         @media print {
             body { background: white; color: black; height: auto; overflow: visible; }
             #login-screen, header, .nav-actions, .action-card, .btn-login, 
-            .modal-header i, #admin-panel, .section-title i { display: none !important; }
+            .modal-header i, #admin-panel, .section-title i, #toast-container { display: none !important; }
             
             #app-container { display: block !important; height: auto; }
             main { padding: 0; max-width: 100%; }
@@ -232,10 +259,12 @@
 </head>
 <body>
 
+    <!-- CONTAINER DE NOTIFICAÇÕES -->
+    <div id="toast-container"></div>
+
     <!-- TELA DE LOGIN / PRIMEIRO ACESSO -->
     <div id="login-screen">
         <div class="login-container">
-            <!-- ATENÇÃO: Verifique se o nome do arquivo é logo.png ou TI.png -->
             <img src="TI.png" alt="TI Claudino S/A" class="logo-img">
             
             <div id="login-form">
@@ -400,9 +429,8 @@
             const SUPABASE_URL = 'https://ijdhvazbjfybbzworqab.supabase.co';
             const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqZGh2YXpiamZ5YmJ6d29ycWFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyOTA2NzgsImV4cCI6MjA5OTg2NjY3OH0.88-9ax0Yw78J30LJkXNt6yVzIRnN6v8EuUOQu_c58jM';
             
-            // Verificação de segurança para evitar erros se a lib não carregar
             if (!window.supabase) {
-                console.error("Biblioteca Supabase não carregada!");
+                showToast("Erro crítico: Biblioteca Supabase não carregada.", "error");
                 return;
             }
 
@@ -410,7 +438,27 @@
 
             let currentUser = null;
             let currentTripId = null;
-            const TEMP_PASSWORD = 'TiClaudino2024!';
+            const TEMP_PASSWORD = 'Gertec20';
+
+            // --- SISTEMA DE NOTIFICAÇÃO PERSONALIZADO ---
+            window.showToast = function(message, type = 'info') {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                
+                let icon = 'fa-info-circle';
+                if (type === 'error') icon = 'fa-exclamation-circle';
+                if (type === 'success') icon = 'fa-check-circle';
+
+                toast.innerHTML = `<i class="fas ${icon}"></i> <span>${message}</span>`;
+                container.appendChild(toast);
+
+                // Remove após 4 segundos
+                setTimeout(() => {
+                    toast.style.animation = 'fadeOut 0.5s ease-out forwards';
+                    setTimeout(() => toast.remove(), 500);
+                }, 4000);
+            };
 
             // --- FUNÇÕES GLOBAIS EXPOSTAS AO WINDOW ---
 
@@ -419,7 +467,7 @@
                 const password = document.getElementById('password').value;
                 
                 if (!usernameInput || !password) {
-                    alert('Preencha usuário e senha');
+                    showToast('Preencha usuário e senha', 'error');
                     return;
                 }
 
@@ -429,6 +477,7 @@
                 btn.disabled = true;
 
                 try {
+                    // Busca perfil (agora permitido pela política RLS de leitura pública)
                     const { data: profile, error: searchError } = await supabase
                         .from('profiles')
                         .select('email, must_change_password')
@@ -470,12 +519,13 @@
                         return;
                     }
 
+                    showToast(`Bem-vindo, ${profile.full_name || usernameInput}!`, 'success');
                     document.getElementById('login-screen').style.display = 'none';
                     document.getElementById('app-container').style.display = 'flex';
                     loadUserData();
 
                 } catch (err) {
-                    alert(err.message);
+                    showToast(err.message, 'error');
                     btn.innerHTML = originalText;
                     btn.disabled = false;
                 }
@@ -485,20 +535,20 @@
                 const newPass = document.getElementById('new-password').value;
                 const confirmPass = document.getElementById('confirm-password').value;
                 
-                if (newPass.length < 6) return alert('Senha deve ter no mínimo 6 caracteres');
-                if (newPass !== confirmPass) return alert('As senhas não coincidem');
+                if (newPass.length < 6) return showToast('Senha deve ter no mínimo 6 caracteres', 'error');
+                if (newPass !== confirmPass) return showToast('As senhas não coincidem', 'error');
                 
                 const { error } = await supabase.auth.updateUser({ password: newPass });
                 
                 if (error) {
-                    alert('Erro ao atualizar senha: ' + error.message);
+                    showToast('Erro ao atualizar senha: ' + error.message, 'error');
                 } else {
                     await supabase.from('profiles')
                         .update({ must_change_password: false })
                         .eq('email', email);
                         
-                    alert('✅ Senha definida com sucesso! Redirecionando...');
-                    location.reload();
+                    showToast('✅ Senha definida com sucesso!', 'success');
+                    setTimeout(() => location.reload(), 1500);
                 }
             };
 
@@ -560,13 +610,13 @@
 
             window.createTrip = async function() {
                 const storeCode = document.getElementById('store-code').value.toUpperCase();
-                if (!storeCode) return alert('Digite a sigla da loja');
+                if (!storeCode) return showToast('Digite a sigla da loja', 'error');
 
                 const { data, error } = await supabase.from('trips').insert([
                     { user_id: currentUser.id, store_code: storeCode, status: 'em_andamento' }
                 ]).select();
 
-                if (error) alert('Erro ao criar viagem');
+                if (error) showToast('Erro ao criar viagem: ' + error.message, 'error');
                 else {
                     currentTripId = data[0].id;
                     openSpreadsheet(storeCode);
@@ -638,7 +688,7 @@
 
             window.submitTrip = async function() {
                 await supabase.from('trips').update({ status: 'enviado' }).eq('id', currentTripId);
-                alert('Viagem enviada para aprovação do Gerente Lemos!');
+                showToast('Viagem enviada para aprovação do Gerente Lemos!', 'success');
                 closeModal();
             };
 
@@ -675,7 +725,7 @@
                 const role = document.getElementById('new-role').value;
                 const team = document.getElementById('new-team').value;
                 
-                if (!username || !name) return alert('Preencha username e nome');
+                if (!username || !name) return showToast('Preencha username e nome', 'error');
 
                 const internalEmail = `${username}@ti-claudino.internal`;
 
@@ -692,7 +742,7 @@
                 });
                 
                 if (error) {
-                    alert('Erro ao criar: ' + error.message);
+                    showToast('Erro ao criar: ' + error.message, 'error');
                 } else {
                     await supabase.from('profiles').insert([{
                         id: data.user.id,
@@ -704,7 +754,7 @@
                         must_change_password: true
                     }]);
                     
-                    alert(`✅ Usuário '${username}' criado!\n Senha inicial: ${TEMP_PASSWORD}\n O usuário deverá alterar no primeiro login.`);
+                    showToast(`✅ Usuário '${username}' criado! Senha inicial: ${TEMP_PASSWORD}`, 'success');
                     loadAllUsers();
                     document.getElementById('new-username').value = '';
                     document.getElementById('new-name').value = '';
@@ -715,7 +765,7 @@
                 if (!confirm(`Remover usuário '${username}'?`)) return;
                 
                 await supabase.from('profiles').delete().eq('id', userId);
-                alert(`Usuário '${username}' removido dos perfis.`);
+                showToast(`Usuário '${username}' removido dos perfis.`, 'success');
                 loadAllUsers();
             };
 
