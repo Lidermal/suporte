@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TI Claudino S/A - Controle de Viagens</title>
+    
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-blue: #0056b3;
+            --dark-blue: #0a192f;
+            --accent-cyan: #00d4ff;
+            --text-grey: #8892b0;
+            --white: #e6f1ff;
+            --card-bg: rgba(17, 34, 64, 0.7);
+            --success: #64ffda;
+            --warning: #ffd700;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+        body {
+            background-color: var(--dark-blue);
+            color: var(--white);
+            height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* TELA DE LOGIN */
+        #login-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #112240 0%, #020c1b 100%);
+            display: flex; justify-content: center; align-items: center; z-index: 1000;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2.5rem;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .logo-img {
+            width: 180px;
+            height: auto;
+            margin-bottom: 1.5rem;
+            filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.3));
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--accent-cyan);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(2, 12, 27, 0.8);
+            border: 1px solid #233554;
+            border-radius: 8px;
+            color: var(--white);
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(90deg, var(--primary-blue), #007bff);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-login:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 86, 179, 0.4);
+        }
+
+        .btn-login:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        /* APP PRINCIPAL */
+        #app-container { display: none; height: 100%; flex-direction: column; }
+
+        header {
+            background: rgba(10, 25, 47, 0.95);
+            padding: 1rem 1.5rem;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid #233554;
+            backdrop-filter: blur(5px);
+        }
+
+        .header-logo img { height: 40px; }
+        
+        .nav-actions i {
+            font-size: 1.2rem; margin-left: 1.5rem; cursor: pointer; color: var(--text-grey); transition: 0.3s;
+        }
+        .nav-actions i:hover { color: var(--accent-cyan); }
+
+        main { flex: 1; padding: 1.5rem; overflow-y: auto; max-width: 1200px; margin: 0 auto; width: 100%; }
+
+        /* Dashboard Cards */
+        .dashboard-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--accent-cyan);
+            box-shadow: 0 10px 30px -10px rgba(2,12,27,0.7);
+        }
+
+        .stat-card h3 { font-size: 0.85rem; color: var(--text-grey); text-transform: uppercase; letter-spacing: 1px; }
+        .stat-card .value { font-size: 2rem; font-weight: 700; margin-top: 0.5rem; color: var(--white); }
+
+        .action-card {
+            background: linear-gradient(135deg, var(--primary-blue), #003d80);
+            display: flex; align-items: center; justify-content: space-between;
+            cursor: pointer; transition: 0.3s; border: none;
+        }
+        .action-card:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(0, 86, 179, 0.5); }
+        .action-card h3 { color: white; margin: 0; }
+        .action-card i { font-size: 2rem; color: rgba(255,255,255,0.8); }
+
+        /* Sistema de Pastas */
+        .section-title { 
+            margin-bottom: 1rem; color: var(--accent-cyan); font-size: 1.2rem; 
+            display: flex; align-items: center; gap: 10px; 
+        }
+        
+        .folder-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 1.5rem;
+        }
+
+        .folder-item {
+            display: flex; flex-direction: column; align-items: center; cursor: pointer;
+        }
+
+        .folder-icon {
+            font-size: 3.5rem; color: var(--warning); margin-bottom: 0.5rem;
+            transition: 0.3s; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+        }
+        .folder-item:hover .folder-icon { transform: translateY(-5px); color: #ffed4a; }
+
+        .folder-name {
+            font-size: 0.85rem; font-weight: 600; text-align: center; word-break: break-word; color: var(--white);
+        }
+
+        .status-dot {
+            width: 8px; height: 8px; border-radius: 50%; margin-top: 5px;
+        }
+        .status-pending { background: var(--warning); box-shadow: 0 0 8px var(--warning); }
+        .status-sent { background: var(--accent-cyan); box-shadow: 0 0 8px var(--accent-cyan); }
+        .status-approved { background: var(--success); box-shadow: 0 0 8px var(--success); }
+
+        /* Modal / Planilha */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(2, 12, 27, 0.9); z-index: 2000; justify-content: center; align-items: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: #112240; width: 95%; max-width: 900px; height: 90%; border-radius: 12px;
+            display: flex; flex-direction: column; overflow: hidden; border: 1px solid #233554;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            padding: 1.2rem; background: #0a192f; border-bottom: 1px solid #233554;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .modal-header h3 { color: var(--accent-cyan); font-family: 'Courier New', monospace; }
+
+        .modal-body { flex: 1; overflow-y: auto; padding: 1.5rem; }
+
+        /* Tabela Tech */
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.9rem; }
+        th { background: #0a192f; color: var(--accent-cyan); padding: 12px; text-align: left; font-weight: 600; border-bottom: 2px solid #233554; }
+        td { border-bottom: 1px solid #233554; padding: 10px; color: var(--text-grey); }
+        tr:hover td { background: rgba(255,255,255,0.02); color: var(--white); }
+        
+        input[type="time"], input[type="date"], input[type="text"] {
+            background: #020c1b; border: 1px solid #233554; color: var(--white);
+            padding: 6px; border-radius: 4px; width: 100%; font-family: monospace;
+        }
+
+        /* Painel Admin */
+        #admin-panel { margin-top: 2rem; }
+        .admin-form-grid {
+            display: grid; grid-template-columns: 2fr 2fr 1fr 1fr auto; gap: 10px; margin-top: 10px;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .folder-grid { grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+            .folder-icon { font-size: 2.5rem; }
+            table { font-size: 0.75rem; }
+            th, td { padding: 6px; }
+            .admin-form-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TELA DE LOGIN COM USUÁRIO E SENHA -->
+    <div id="login-screen">
+        <div class="login-container">
+            <img src="logo.png" alt="TI Claudino S/A" class="logo-img">
+            
+            <div class="input-group">
+                <label>USUÁRIO</label>
+                <input type="text" id="username" placeholder="Ex: lemos, didi, anna" autocomplete="off">
+            </div>
+            
+            <div class="input-group">
+                <label>SENHA</label>
+                <input type="password" id="password" placeholder="••••••••">
+            </div>
+            
+            <button class="btn-login" onclick="handleLogin()">
+                <i class="fas fa-sign-in-alt"></i> Acessar Sistema
+            </button>
+            
+            <p style="margin-top: 1.5rem; font-size: 0.75rem; color: var(--text-grey);">
+                <i class="fas fa-shield-alt"></i> Acesso Restrito - TI Claudino S/A
+            </p>
+        </div>
+    </div>
+
+    <!-- APLICAÇÃO PRINCIPAL -->
+    <div id="app-container">
+        <header>
+            <div class="header-logo">
+                <img src="logo.png" alt="Logo">
+            </div>
+            <div class="nav-actions">
+                <i class="fas fa-bell" title="Notificações"></i>
+                <i class="fas fa-user-circle" title="Perfil" onclick="logout()"></i>
+            </div>
+        </header>
+
+        <main>
+            <div id="dashboard-view">
+                <h2 style="margin-bottom: 1.5rem; color: var(--white);">Painel de Controle <span style="color:var(--accent-cyan)">// <span id="user-name">Usuário</span></span></h2>
+                
+                <div class="dashboard-grid">
+                    <div class="stat-card">
+                        <h3>Horas Extras (Mês)</h3>
+                        <div class="value" id="total-hours">00:00</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Valor Previsto</h3>
+                        <div class="value" style="color: var(--success);" id="total-value">R$ 0,00</div>
+                    </div>
+                    <div class="stat-card action-card" onclick="openNewTripModal()">
+                        <div>
+                            <h3>Nova Viagem</h3>
+                            <small style="color:rgba(255,255,255,0.7)">Registrar deslocamento</small>
+                        </div>
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                </div>
+
+                <div class="section-title">
+                    <i class="fas fa-folder-open"></i> DIRETÓRIO DE VIAGENS
+                </div>
+                <div class="folder-grid" id="trips-folder-grid">
+                    <!-- Pastas geradas via JS -->
+                </div>
+
+                <!-- PAINEL ADMINISTRATIVO (Só aparece para admins) -->
+                <div id="admin-panel" style="display: none;">
+                    <div class="section-title">
+                        <i class="fas fa-users-cog"></i> GERENCIAMENTO DE EQUIPE
+                    </div>
+                    
+                    <div class="stat-card" style="margin-bottom: 1rem;">
+                        <h3>Adicionar Novo Membro</h3>
+                        <div class="admin-form-grid">
+                            <input type="text" id="new-username" placeholder="Username (ex: joao.victor)">
+                            <input type="text" id="new-name" placeholder="Nome Completo">
+                            <select id="new-role">
+                                <option value="suporte">Suporte N1</option>
+                                <option value="coordenador">Coordenador</option>
+                                <option value="gerente">Gerente</option>
+                            </select>
+                            <select id="new-team">
+                                <option value="Anna">Equipe Anna</option>
+                                <option value="Didi">Equipe Didi</option>
+                            </select>
+                            <button onclick="addNewUser()" style="background: var(--success); color: #020c1b; border:none; border-radius:8px; cursor:pointer;">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <table id="users-table">
+                        <thead>
+                            <tr>
+                                <th>USUÁRIO</th>
+                                <th>NOME</th>
+                                <th>EQUIPE</th>
+                                <th>CARGO</th>
+                                <th>AÇÕES</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL DE PLANILHA -->
+    <div id="trip-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">~/viagens/nova_registro</h3>
+                <i class="fas fa-times" style="cursor: pointer; color: var(--text-grey);" onclick="closeModal()"></i>
+            </div>
+            <div class="modal-body">
+                <div id="new-trip-form" style="max-width: 400px; margin: 2rem auto;">
+                    <label style="color: var(--accent-cyan); display:block; margin-bottom:0.5rem;">SIGLA DA LOJA / DESTINO:</label>
+                    <input type="text" id="store-code" placeholder="Ex: DTI, SHOPPING..." style="font-size: 1.2rem; text-transform: uppercase;">
+                    <button class="btn-login" style="margin-top: 1rem;" onclick="createTrip()">CRIAR PASTA</button>
+                </div>
+
+                <div id="spreadsheet-view" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h4 style="color: var(--white);"><i class="fas fa-file-excel"></i> Planilha: <span id="current-store" style="color: var(--accent-cyan);"></span></h4>
+                        <button onclick="submitTrip()" style="background: var(--success); color: #020c1b; border:none; padding: 8px 16px; border-radius: 4px; font-weight:bold; cursor:pointer;">
+                            <i class="fas fa-paper-plane"></i> ENVIAR PARA LEMOS
+                        </button>
+                    </div>
+                    
+                    <div style="overflow-x: auto;">
+                        <table id="hours-table">
+                            <thead>
+                                <tr>
+                                    <th>DIA</th>
+                                    <th>DATA</th>
+                                    <th>ENTRADA</th>
+                                    <th>SAÍDA ALM.</th>
+                                    <th>VOLTA ALM.</th>
+                                    <th>SAÍDA</th>
+                                    <th>H.E.</th>
+                                    <th>VALOR</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body"></tbody>
+                        </table>
+                    </div>
+                    <div style="margin-top: 1.5rem; text-align: right; font-size: 1.2rem; color: var(--success);">
+                        TOTAL DA VIAGEM: <span id="trip-total-value">R$ 0,00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CONFIGURAÇÃO SUPABASE
+        const SUPABASE_URL = 'SUA_URL_SUPABASE';
+        const SUPABASE_KEY = 'SUA_ANON_KEY';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let currentUser = null;
+        let currentTripId = null;
+
+        // AUTENTICAÇÃO POR USERNAME
+        async function handleLogin() {
+            const usernameInput = document.getElementById('username').value.trim().toLowerCase();
+            const password = document.getElementById('password').value;
+            
+            if (!usernameInput || !password) {
+                alert('Preencha usuário e senha');
+                return;
+            }
+
+            const btn = document.querySelector('.btn-login');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando...';
+            btn.disabled = true;
+
+            try {
+                // Busca o email interno associado ao username
+                const { data: profile, error: searchError } = await supabase
+                    .from('profiles')
+                    .select('email')
+                    .eq('username', usernameInput)
+                    .single();
+
+                if (searchError || !profile) {
+                    throw new Error('Usuário não encontrado');
+                }
+
+                // Usa o email interno para autenticar no Supabase Auth
+                const { data, error: authError } = await supabase.auth.signInWithPassword({
+                    email: profile.email,
+                    password: password
+                });
+
+                if (authError) {
+                    throw new Error('Senha incorreta');
+                }
+
+                currentUser = data.user;
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('app-container').style.display = 'flex';
+                loadUserData();
+
+            } catch (err) {
+                alert(err.message);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        async function loadUserData() {
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', currentUser.id)
+                .single();
+                
+            document.getElementById('user-name').innerText = profile.full_name || profile.username;
+            
+            // Mostra painel admin apenas para coordenadores e gerente
+            if (['gerente', 'coordenador'].includes(profile.role)) {
+                document.getElementById('admin-panel').style.display = 'block';
+                loadAllUsers();
+            }
+            
+            loadTrips();
+        }
+
+        function logout() {
+            supabase.auth.signOut();
+            location.reload();
+        }
+
+        // CARREGAR VIAGENS DO USUÁRIO
+        async function loadTrips() {
+            const { data: trips } = await supabase
+                .from('trips')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .order('created_at', {ascending: false});
+                
+            const grid = document.getElementById('trips-folder-grid');
+            grid.innerHTML = '';
+
+            trips.forEach(trip => {
+                let statusClass = 'status-pending';
+                if(trip.status === 'enviado') statusClass = 'status-sent';
+                if(['recebido', 'aprovado'].includes(trip.status)) statusClass = 'status-approved';
+
+                const folder = document.createElement('div');
+                folder.className = 'folder-item';
+                folder.innerHTML = `
+                    <i class="fas fa-folder folder-icon"></i>
+                    <span class="folder-name">${trip.store_code}</span>
+                    <div class="status-dot ${statusClass}"></div>
+                `;
+                folder.onclick = () => openTrip(trip.id, trip.store_code);
+                grid.appendChild(folder);
+            });
+        }
+
+        function openNewTripModal() {
+            document.getElementById('trip-modal').style.display = 'flex';
+            document.getElementById('new-trip-form').style.display = 'block';
+            document.getElementById('spreadsheet-view').style.display = 'none';
+            document.getElementById('store-code').value = '';
+        }
+
+        async function createTrip() {
+            const storeCode = document.getElementById('store-code').value.toUpperCase();
+            if (!storeCode) return alert('Digite a sigla da loja');
+
+            const { data, error } = await supabase.from('trips').insert([
+                { user_id: currentUser.id, store_code: storeCode, status: 'em_andamento' }
+            ]).select();
+
+            if (error) alert('Erro ao criar viagem');
+            else {
+                currentTripId = data[0].id;
+                openSpreadsheet(storeCode);
+            }
+        }
+
+        function openTrip(id, storeCode) {
+            currentTripId = id;
+            openSpreadsheet(storeCode);
+        }
+
+        function openSpreadsheet(storeCode) {
+            document.getElementById('new-trip-form').style.display = 'none';
+            document.getElementById('spreadsheet-view').style.display = 'block';
+            document.getElementById('current-store').innerText = storeCode;
+            document.getElementById('modal-title').innerText = `~/viagens/${storeCode}/registro.log`;
+            generateTableRows();
+        }
+
+        function closeModal() {
+            document.getElementById('trip-modal').style.display = 'none';
+            loadTrips();
+        }
+
+        // GERAÇÃO DA PLANILHA
+        function generateTableRows() {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+            for (let i = 0; i < 7; i++) {
+                const row = `
+                    <tr>
+                        <td style="font-weight:bold; color:var(--accent-cyan)">${getDayOfWeek(i)}</td>
+                        <td><input type="date" class="log-date"></td>
+                        <td><input type="time" class="entry-time" onchange="calculateRow(this)"></td>
+                        <td><input type="time" class="lunch-out"></td>
+                        <td><input type="time" class="lunch-in"></td>
+                        <td><input type="time" class="exit-time" onchange="calculateRow(this)"></td>
+                        <td class="total-he" style="color:var(--warning)">0.00</td>
+                        <td class="value-he">R$ 0,00</td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            }
+        }
+
+        function getDayOfWeek(offset) {
+            const days = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
+            const d = new Date();
+            d.setDate(d.getDate() + offset);
+            return days[d.getDay()];
+        }
+
+        function calculateRow(input) {
+            const row = input.closest('tr');
+            const entry = row.querySelector('.entry-time').value;
+            const exit = row.querySelector('.exit-time').value;
+            
+            if (entry && exit) {
+                const start = new Date(`2000-01-01T${entry}`);
+                const end = new Date(`2000-01-01T${exit}`);
+                let diff = (end - start) / 36e5; 
+                if (diff < 0) diff += 24;
+                
+                let overtime = diff > 8 ? diff - 8 : 0;
+                
+                row.querySelector('.total-he').innerText = overtime.toFixed(2);
+                row.querySelector('.value-he').innerText = `R$ ${(overtime * 11.37).toFixed(2)}`;
+            }
+        }
+
+        async function submitTrip() {
+            await supabase.from('trips').update({ status: 'enviado' }).eq('id', currentTripId);
+            alert('Viagem enviada para aprovação do Gerente Lemos!');
+            closeModal();
+        }
+
+        // FUNÇÕES DO PAINEL ADMIN
+        async function loadAllUsers() {
+            const { data: users } = await supabase
+                .from('profiles')
+                .select('id, username, full_name, team, role')
+                .order('team', { ascending: true });
+                
+            const tbody = document.getElementById('users-tbody');
+            tbody.innerHTML = '';
+            
+            users.forEach(user => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="color:var(--accent-cyan); font-weight:600;">${user.username}</td>
+                    <td>${user.full_name}</td>
+                    <td>${user.team || '-'}</td>
+                    <td>${user.role.toUpperCase()}</td>
+                    <td>
+                        <button onclick="removeUser('${user.id}', '${user.username}')" 
+                                style="background:none; border:none; color:#ff6b6b; cursor:pointer;">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function addNewUser() {
+            const username = document.getElementById('new-username').value.trim().toLowerCase();
+            const name = document.getElementById('new-name').value;
+            const role = document.getElementById('new-role').value;
+            const team = document.getElementById('new-team').value;
+            const tempPass = 'TiClaudino2024!';
+            
+            if (!username || !name) return alert('Preencha username e nome');
+
+            // Gera email interno único
+            const internalEmail = `${username}@ti-claudino.internal`;
+
+            const { data, error } = await supabase.auth.admin.createUser({
+                email: internalEmail,
+                password: tempPass,
+                email_confirm: true,
+                user_metadata: { 
+                    full_name: name, 
+                    username: username,
+                    role: role, 
+                    team: team 
+                }
+            });
+            
+            if (error) {
+                alert('Erro ao criar: ' + error.message);
+            } else {
+                await supabase.from('profiles').insert([{
+                    id: data.user.id,
+                    email: internalEmail,
+                    username: username,
+                    full_name: name,
+                    role: role,
+                    team: team
+                }]);
+                
+                alert(`✅ Usuário '${username}' criado!\n Senha temporária: ${tempPass}`);
+                loadAllUsers();
+                document.getElementById('new-username').value = '';
+                document.getElementById('new-name').value = '';
+            }
+        }
+
+        async function removeUser(userId, username) {
+            if (!confirm(`Remover usuário '${username}'?`)) return;
+            
+            await supabase.from('profiles').delete().eq('id', userId);
+            alert(`Usuário '${username}' removido dos perfis.`);
+            loadAllUsers();
+        }
+    </script>
+</body>
+</html>
