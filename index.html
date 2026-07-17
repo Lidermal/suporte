@@ -235,7 +235,8 @@
     <!-- TELA DE LOGIN / PRIMEIRO ACESSO -->
     <div id="login-screen">
         <div class="login-container">
-            <img src="TI.png" alt="TI Claudino S/A" class="logo-img">
+            <!-- ATENÇÃO: Verifique se o nome do arquivo é logo.png ou TI.png -->
+            <img src="logo.png" alt="TI Claudino S/A" class="logo-img">
             
             <div id="login-form">
                 <div class="input-group">
@@ -248,7 +249,7 @@
                     <input type="password" id="password" placeholder="••••••••">
                 </div>
                 
-                <button class="btn-login" onclick="handleLogin()">
+                <button class="btn-login" onclick="window.handleLogin()">
                     <i class="fas fa-sign-in-alt"></i> Acessar Sistema
                 </button>
             </div>
@@ -267,7 +268,7 @@
             </div>
             <div class="nav-actions">
                 <i class="fas fa-bell" title="Notificações"></i>
-                <i class="fas fa-user-circle" title="Perfil" onclick="logout()"></i>
+                <i class="fas fa-user-circle" title="Perfil" onclick="window.logout()"></i>
             </div>
         </header>
 
@@ -284,7 +285,7 @@
                         <h3>Valor Previsto</h3>
                         <div class="value" style="color: var(--success);" id="total-value">R$ 0,00</div>
                     </div>
-                    <div class="stat-card action-card" onclick="openNewTripModal()">
+                    <div class="stat-card action-card" onclick="window.openNewTripModal()">
                         <div>
                             <h3>Nova Viagem</h3>
                             <small style="color:rgba(255,255,255,0.7)">Registrar deslocamento</small>
@@ -318,7 +319,7 @@
                                 <option value="Anna">Equipe Anna</option>
                                 <option value="Didi">Equipe Didi</option>
                             </select>
-                            <button onclick="addNewUser()" style="background: var(--success); color: #020c1b; border:none; border-radius:8px; cursor:pointer;">
+                            <button onclick="window.addNewUser()" style="background: var(--success); color: #020c1b; border:none; border-radius:8px; cursor:pointer;">
                                 <i class="fas fa-plus"></i>
                             </button>
                         </div>
@@ -348,20 +349,20 @@
                 <h3 id="modal-title">~/viagens/nova_registro</h3>
                 <div>
                     <i class="fas fa-print" style="cursor: pointer; color: var(--text-grey); margin-right: 15px;" onclick="window.print()" title="Imprimir"></i>
-                    <i class="fas fa-times" style="cursor: pointer; color: var(--text-grey);" onclick="closeModal()"></i>
+                    <i class="fas fa-times" style="cursor: pointer; color: var(--text-grey);" onclick="window.closeModal()"></i>
                 </div>
             </div>
             <div class="modal-body">
                 <div id="new-trip-form" style="max-width: 400px; margin: 2rem auto;">
                     <label style="color: var(--accent-cyan); display:block; margin-bottom:0.5rem;">SIGLA DA LOJA / DESTINO:</label>
                     <input type="text" id="store-code" placeholder="Ex: DTI, SHOPPING..." style="font-size: 1.2rem; text-transform: uppercase;">
-                    <button class="btn-login" style="margin-top: 1rem;" onclick="createTrip()">CRIAR PASTA</button>
+                    <button class="btn-login" style="margin-top: 1rem;" onclick="window.createTrip()">CRIAR PASTA</button>
                 </div>
 
                 <div id="spreadsheet-view" style="display: none;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                         <h4><i class="fas fa-file-excel"></i> Planilha: <span id="current-store" style="color: var(--accent-cyan);"></span></h4>
-                        <button onclick="submitTrip()" style="background: var(--success); color: #020c1b; border:none; padding: 8px 16px; border-radius: 4px; font-weight:bold; cursor:pointer;">
+                        <button onclick="window.submitTrip()" style="background: var(--success); color: #020c1b; border:none; padding: 8px 16px; border-radius: 4px; font-weight:bold; cursor:pointer;">
                             <i class="fas fa-paper-plane"></i> ENVIAR PARA LEMOS
                         </button>
                     </div>
@@ -392,323 +393,333 @@
     </div>
 
     <script>
-        // CONFIGURAÇÃO SUPABASE
-        const SUPABASE_URL = 'https://ijdhvazbjfybbzworqab.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqZGh2YXpiamZ5YmJ6d29ycWFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyOTA2NzgsImV4cCI6MjA5OTg2NjY3OH0.88-9ax0Yw78J30LJkXNt6yVzIRnN6v8EuUOQu_c58jM';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        let currentUser = null;
-        let currentTripId = null;
-        const TEMP_PASSWORD = 'TiClaudino2024!';
-
-        // AUTENTICAÇÃO POR USERNAME + PRIMEIRO ACESSO
-        async function handleLogin() {
-            const usernameInput = document.getElementById('username').value.trim().toLowerCase();
-            const password = document.getElementById('password').value;
+        // GARANTIR QUE O DOM ESTEJA PRONTO ANTES DE EXECUTAR
+        document.addEventListener('DOMContentLoaded', () => {
             
-            if (!usernameInput || !password) {
-                alert('Preencha usuário e senha');
+            // CONFIGURAÇÃO SUPABASE
+            const SUPABASE_URL = 'https://ijdhvazbjfybbzworqab.supabase.co';
+            const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqZGh2YXpiamZ5YmJ6d29ycWFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyOTA2NzgsImV4cCI6MjA5OTg2NjY3OH0.88-9ax0Yw78J30LJkXNt6yVzIRnN6v8EuUOQu_c58jM';
+            
+            // Verificação de segurança para evitar erros se a lib não carregar
+            if (!window.supabase) {
+                console.error("Biblioteca Supabase não carregada!");
                 return;
             }
 
-            const btn = document.querySelector('.btn-login');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando...';
-            btn.disabled = true;
+            const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-            try {
-                const { data: profile, error: searchError } = await supabase
-                    .from('profiles')
-                    .select('email, must_change_password')
-                    .eq('username', usernameInput)
-                    .single();
+            let currentUser = null;
+            let currentTripId = null;
+            const TEMP_PASSWORD = 'TiClaudino2024!';
 
-                if (searchError || !profile) throw new Error('Usuário não encontrado');
+            // --- FUNÇÕES GLOBAIS EXPOSTAS AO WINDOW ---
 
-                const { data, error: authError } = await supabase.auth.signInWithPassword({
-                    email: profile.email,
-                    password: password
-                });
-
-                if (authError) throw new Error('Senha incorreta');
-
-                currentUser = data.user;
+            window.handleLogin = async function() {
+                const usernameInput = document.getElementById('username').value.trim().toLowerCase();
+                const password = document.getElementById('password').value;
                 
-                // VERIFICAÇÃO UNIVERSAL DE PRIMEIRO ACESSO
-                if (profile.must_change_password === true && password === TEMP_PASSWORD) {
-                    document.getElementById('login-form').innerHTML = `
-                        <h3 style="color:var(--accent-cyan); margin-bottom:1rem;">PRIMEIRO ACESSO</h3>
-                        <p style="font-size:0.85rem; color:var(--text-grey); margin-bottom:1.5rem;">
-                            Olá, <strong>${usernameInput}</strong>.<br>
-                            Defina sua senha pessoal definitiva.<br>
-                            <span style="color:var(--warning)">Atenção: Não haverá recuperação por e-mail.</span>
-                        </p>
-                        <div class="input-group">
-                            <label>NOVA SENHA</label>
-                            <input type="password" id="new-password" placeholder="Mínimo 6 caracteres">
-                        </div>
-                        <div class="input-group">
-                            <label>CONFIRME A SENHA</label>
-                            <input type="password" id="confirm-password" placeholder="Repita a senha">
-                        </div>
-                        <button class="btn-login" onclick="changeFirstPassword('${profile.email}')">
-                            DEFINIR SENHA PERMANENTE
-                        </button>
-                    `;
+                if (!usernameInput || !password) {
+                    alert('Preencha usuário e senha');
                     return;
                 }
 
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('app-container').style.display = 'flex';
-                loadUserData();
+                const btn = document.querySelector('.btn-login');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando...';
+                btn.disabled = true;
 
-            } catch (err) {
-                alert(err.message);
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        }
+                try {
+                    const { data: profile, error: searchError } = await supabase
+                        .from('profiles')
+                        .select('email, must_change_password')
+                        .eq('username', usernameInput)
+                        .single();
 
-        async function changeFirstPassword(email) {
-            const newPass = document.getElementById('new-password').value;
-            const confirmPass = document.getElementById('confirm-password').value;
-            
-            if (newPass.length < 6) return alert('Senha deve ter no mínimo 6 caracteres');
-            if (newPass !== confirmPass) return alert('As senhas não coincidem');
-            
-            const { error } = await supabase.auth.updateUser({ password: newPass });
-            
-            if (error) {
-                alert('Erro ao atualizar senha: ' + error.message);
-            } else {
-                await supabase.from('profiles')
-                    .update({ must_change_password: false })
-                    .eq('email', email);
+                    if (searchError || !profile) throw new Error('Usuário não encontrado');
+
+                    const { data, error: authError } = await supabase.auth.signInWithPassword({
+                        email: profile.email,
+                        password: password
+                    });
+
+                    if (authError) throw new Error('Senha incorreta');
+
+                    currentUser = data.user;
                     
-                alert('✅ Senha definida com sucesso! Redirecionando...');
+                    // VERIFICAÇÃO UNIVERSAL DE PRIMEIRO ACESSO
+                    if (profile.must_change_password === true && password === TEMP_PASSWORD) {
+                        document.getElementById('login-form').innerHTML = `
+                            <h3 style="color:var(--accent-cyan); margin-bottom:1rem;">PRIMEIRO ACESSO</h3>
+                            <p style="font-size:0.85rem; color:var(--text-grey); margin-bottom:1.5rem;">
+                                Olá, <strong>${usernameInput}</strong>.<br>
+                                Defina sua senha pessoal definitiva.<br>
+                                <span style="color:var(--warning)">Atenção: Não haverá recuperação por e-mail.</span>
+                            </p>
+                            <div class="input-group">
+                                <label>NOVA SENHA</label>
+                                <input type="password" id="new-password" placeholder="Mínimo 6 caracteres">
+                            </div>
+                            <div class="input-group">
+                                <label>CONFIRME A SENHA</label>
+                                <input type="password" id="confirm-password" placeholder="Repita a senha">
+                            </div>
+                            <button class="btn-login" onclick="window.changeFirstPassword('${profile.email}')">
+                                DEFINIR SENHA PERMANENTE
+                            </button>
+                        `;
+                        return;
+                    }
+
+                    document.getElementById('login-screen').style.display = 'none';
+                    document.getElementById('app-container').style.display = 'flex';
+                    loadUserData();
+
+                } catch (err) {
+                    alert(err.message);
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            };
+
+            window.changeFirstPassword = async function(email) {
+                const newPass = document.getElementById('new-password').value;
+                const confirmPass = document.getElementById('confirm-password').value;
+                
+                if (newPass.length < 6) return alert('Senha deve ter no mínimo 6 caracteres');
+                if (newPass !== confirmPass) return alert('As senhas não coincidem');
+                
+                const { error } = await supabase.auth.updateUser({ password: newPass });
+                
+                if (error) {
+                    alert('Erro ao atualizar senha: ' + error.message);
+                } else {
+                    await supabase.from('profiles')
+                        .update({ must_change_password: false })
+                        .eq('email', email);
+                        
+                    alert('✅ Senha definida com sucesso! Redirecionando...');
+                    location.reload();
+                }
+            };
+
+            window.loadUserData = async function() {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', currentUser.id)
+                    .single();
+                    
+                document.getElementById('user-name').innerText = profile.full_name || profile.username;
+                
+                if (['gerente', 'coordenador'].includes(profile.role)) {
+                    document.getElementById('admin-panel').style.display = 'block';
+                    loadAllUsers();
+                }
+                
+                loadTrips();
+            };
+
+            window.logout = function() {
+                supabase.auth.signOut();
                 location.reload();
-            }
-        }
+            };
 
-        async function loadUserData() {
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', currentUser.id)
-                .single();
-                
-            document.getElementById('user-name').innerText = profile.full_name || profile.username;
-            
-            if (['gerente', 'coordenador'].includes(profile.role)) {
-                document.getElementById('admin-panel').style.display = 'block';
-                loadAllUsers();
-            }
-            
-            loadTrips();
-        }
+            window.loadTrips = async function() {
+                const { data: trips } = await supabase
+                    .from('trips')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', {ascending: false});
+                    
+                const grid = document.getElementById('trips-folder-grid');
+                grid.innerHTML = '';
 
-        function logout() {
-            supabase.auth.signOut();
-            location.reload();
-        }
+                trips.forEach(trip => {
+                    let statusClass = 'status-pending';
+                    if(trip.status === 'enviado') statusClass = 'status-sent';
+                    if(['recebido', 'aprovado'].includes(trip.status)) statusClass = 'status-approved';
 
-        // CARREGAR VIAGENS DO USUÁRIO
-        async function loadTrips() {
-            const { data: trips } = await supabase
-                .from('trips')
-                .select('*')
-                .eq('user_id', currentUser.id)
-                .order('created_at', {ascending: false});
-                
-            const grid = document.getElementById('trips-folder-grid');
-            grid.innerHTML = '';
+                    const folder = document.createElement('div');
+                    folder.className = 'folder-item';
+                    folder.innerHTML = `
+                        <i class="fas fa-folder folder-icon"></i>
+                        <span class="folder-name">${trip.store_code}</span>
+                        <div class="status-dot ${statusClass}"></div>
+                    `;
+                    folder.onclick = () => openTrip(trip.id, trip.store_code);
+                    grid.appendChild(folder);
+                });
+            };
 
-            trips.forEach(trip => {
-                let statusClass = 'status-pending';
-                if(trip.status === 'enviado') statusClass = 'status-sent';
-                if(['recebido', 'aprovado'].includes(trip.status)) statusClass = 'status-approved';
+            window.openNewTripModal = function() {
+                document.getElementById('trip-modal').style.display = 'flex';
+                document.getElementById('new-trip-form').style.display = 'block';
+                document.getElementById('spreadsheet-view').style.display = 'none';
+                document.getElementById('store-code').value = '';
+            };
 
-                const folder = document.createElement('div');
-                folder.className = 'folder-item';
-                folder.innerHTML = `
-                    <i class="fas fa-folder folder-icon"></i>
-                    <span class="folder-name">${trip.store_code}</span>
-                    <div class="status-dot ${statusClass}"></div>
-                `;
-                folder.onclick = () => openTrip(trip.id, trip.store_code);
-                grid.appendChild(folder);
-            });
-        }
+            window.createTrip = async function() {
+                const storeCode = document.getElementById('store-code').value.toUpperCase();
+                if (!storeCode) return alert('Digite a sigla da loja');
 
-        function openNewTripModal() {
-            document.getElementById('trip-modal').style.display = 'flex';
-            document.getElementById('new-trip-form').style.display = 'block';
-            document.getElementById('spreadsheet-view').style.display = 'none';
-            document.getElementById('store-code').value = '';
-        }
+                const { data, error } = await supabase.from('trips').insert([
+                    { user_id: currentUser.id, store_code: storeCode, status: 'em_andamento' }
+                ]).select();
 
-        async function createTrip() {
-            const storeCode = document.getElementById('store-code').value.toUpperCase();
-            if (!storeCode) return alert('Digite a sigla da loja');
+                if (error) alert('Erro ao criar viagem');
+                else {
+                    currentTripId = data[0].id;
+                    openSpreadsheet(storeCode);
+                }
+            };
 
-            const { data, error } = await supabase.from('trips').insert([
-                { user_id: currentUser.id, store_code: storeCode, status: 'em_andamento' }
-            ]).select();
-
-            if (error) alert('Erro ao criar viagem');
-            else {
-                currentTripId = data[0].id;
+            function openTrip(id, storeCode) {
+                currentTripId = id;
                 openSpreadsheet(storeCode);
             }
-        }
 
-        function openTrip(id, storeCode) {
-            currentTripId = id;
-            openSpreadsheet(storeCode);
-        }
-
-        function openSpreadsheet(storeCode) {
-            document.getElementById('new-trip-form').style.display = 'none';
-            document.getElementById('spreadsheet-view').style.display = 'block';
-            document.getElementById('current-store').innerText = storeCode;
-            document.getElementById('modal-title').innerText = `~/viagens/${storeCode}/registro.log`;
-            generateTableRows();
-        }
-
-        function closeModal() {
-            document.getElementById('trip-modal').style.display = 'none';
-            loadTrips();
-        }
-
-        // GERAÇÃO DA PLANILHA E CÁLCULOS
-        function generateTableRows() {
-            const tbody = document.getElementById('table-body');
-            tbody.innerHTML = '';
-            for (let i = 0; i < 7; i++) {
-                const row = `
-                    <tr>
-                        <td style="font-weight:bold; color:var(--accent-cyan)">${getDayOfWeek(i)}</td>
-                        <td><input type="date" class="log-date"></td>
-                        <td><input type="time" class="entry-time" onchange="calculateRow(this)"></td>
-                        <td><input type="time" class="lunch-out"></td>
-                        <td><input type="time" class="lunch-in"></td>
-                        <td><input type="time" class="exit-time" onchange="calculateRow(this)"></td>
-                        <td class="total-he" style="color:var(--warning)">0.00</td>
-                        <td class="value-he">R$ 0,00</td>
-                    </tr>
-                `;
-                tbody.innerHTML += row;
+            function openSpreadsheet(storeCode) {
+                document.getElementById('new-trip-form').style.display = 'none';
+                document.getElementById('spreadsheet-view').style.display = 'block';
+                document.getElementById('current-store').innerText = storeCode;
+                document.getElementById('modal-title').innerText = `~/viagens/${storeCode}/registro.log`;
+                generateTableRows();
             }
-        }
 
-        function getDayOfWeek(offset) {
-            const days = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
-            const d = new Date();
-            d.setDate(d.getDate() + offset);
-            return days[d.getDay()];
-        }
+            window.closeModal = function() {
+                document.getElementById('trip-modal').style.display = 'none';
+                loadTrips();
+            };
 
-        function calculateRow(input) {
-            const row = input.closest('tr');
-            const entry = row.querySelector('.entry-time').value;
-            const exit = row.querySelector('.exit-time').value;
-            
-            if (entry && exit) {
-                const start = new Date(`2000-01-01T${entry}`);
-                const end = new Date(`2000-01-01T${exit}`);
-                let diff = (end - start) / 36e5; 
-                if (diff < 0) diff += 24;
-                
-                let overtime = diff > 8 ? diff - 8 : 0;
-                
-                row.querySelector('.total-he').innerText = overtime.toFixed(2);
-                row.querySelector('.value-he').innerText = `R$ ${(overtime * 11.37).toFixed(2)}`;
-            }
-        }
-
-        async function submitTrip() {
-            await supabase.from('trips').update({ status: 'enviado' }).eq('id', currentTripId);
-            alert('Viagem enviada para aprovação do Gerente Lemos!');
-            closeModal();
-        }
-
-        // FUNÇÕES DO PAINEL ADMIN
-        async function loadAllUsers() {
-            const { data: users } = await supabase
-                .from('profiles')
-                .select('id, username, full_name, team, role')
-                .order('team', { ascending: true });
-                
-            const tbody = document.getElementById('users-tbody');
-            tbody.innerHTML = '';
-            
-            users.forEach(user => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td style="color:var(--accent-cyan); font-weight:600;">${user.username}</td>
-                    <td>${user.full_name}</td>
-                    <td>${user.team || '-'}</td>
-                    <td>${user.role.toUpperCase()}</td>
-                    <td>
-                        <button onclick="removeUser('${user.id}', '${user.username}')" 
-                                style="background:none; border:none; color:var(--danger); cursor:pointer;">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        async function addNewUser() {
-            const username = document.getElementById('new-username').value.trim().toLowerCase();
-            const name = document.getElementById('new-name').value;
-            const role = document.getElementById('new-role').value;
-            const team = document.getElementById('new-team').value;
-            
-            if (!username || !name) return alert('Preencha username e nome');
-
-            const internalEmail = `${username}@ti-claudino.internal`;
-
-            const { data, error } = await supabase.auth.admin.createUser({
-                email: internalEmail,
-                password: TEMP_PASSWORD,
-                email_confirm: true,
-                user_metadata: { 
-                    full_name: name, 
-                    username: username,
-                    role: role, 
-                    team: team 
+            function generateTableRows() {
+                const tbody = document.getElementById('table-body');
+                tbody.innerHTML = '';
+                for (let i = 0; i < 7; i++) {
+                    const row = `
+                        <tr>
+                            <td style="font-weight:bold; color:var(--accent-cyan)">${getDayOfWeek(i)}</td>
+                            <td><input type="date" class="log-date"></td>
+                            <td><input type="time" class="entry-time" onchange="calculateRow(this)"></td>
+                            <td><input type="time" class="lunch-out"></td>
+                            <td><input type="time" class="lunch-in"></td>
+                            <td><input type="time" class="exit-time" onchange="calculateRow(this)"></td>
+                            <td class="total-he" style="color:var(--warning)">0.00</td>
+                            <td class="value-he">R$ 0,00</td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += row;
                 }
-            });
-            
-            if (error) {
-                alert('Erro ao criar: ' + error.message);
-            } else {
-                await supabase.from('profiles').insert([{
-                    id: data.user.id,
-                    email: internalEmail,
-                    username: username,
-                    full_name: name,
-                    role: role,
-                    team: team,
-                    must_change_password: true
-                }]);
-                
-                alert(`✅ Usuário '${username}' criado!\n Senha inicial: ${TEMP_PASSWORD}\n O usuário deverá alterar no primeiro login.`);
-                loadAllUsers();
-                document.getElementById('new-username').value = '';
-                document.getElementById('new-name').value = '';
             }
-        }
 
-        async function removeUser(userId, username) {
-            if (!confirm(`Remover usuário '${username}'?`)) return;
-            
-            await supabase.from('profiles').delete().eq('id', userId);
-            alert(`Usuário '${username}' removido dos perfis.`);
-            loadAllUsers();
-        }
+            function getDayOfWeek(offset) {
+                const days = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
+                const d = new Date();
+                d.setDate(d.getDate() + offset);
+                return days[d.getDay()];
+            }
+
+            function calculateRow(input) {
+                const row = input.closest('tr');
+                const entry = row.querySelector('.entry-time').value;
+                const exit = row.querySelector('.exit-time').value;
+                
+                if (entry && exit) {
+                    const start = new Date(`2000-01-01T${entry}`);
+                    const end = new Date(`2000-01-01T${exit}`);
+                    let diff = (end - start) / 36e5; 
+                    if (diff < 0) diff += 24;
+                    
+                    let overtime = diff > 8 ? diff - 8 : 0;
+                    
+                    row.querySelector('.total-he').innerText = overtime.toFixed(2);
+                    row.querySelector('.value-he').innerText = `R$ ${(overtime * 11.37).toFixed(2)}`;
+                }
+            }
+
+            window.submitTrip = async function() {
+                await supabase.from('trips').update({ status: 'enviado' }).eq('id', currentTripId);
+                alert('Viagem enviada para aprovação do Gerente Lemos!');
+                closeModal();
+            };
+
+            window.loadAllUsers = async function() {
+                const { data: users } = await supabase
+                    .from('profiles')
+                    .select('id, username, full_name, team, role')
+                    .order('team', { ascending: true });
+                    
+                const tbody = document.getElementById('users-tbody');
+                tbody.innerHTML = '';
+                
+                users.forEach(user => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td style="color:var(--accent-cyan); font-weight:600;">${user.username}</td>
+                        <td>${user.full_name}</td>
+                        <td>${user.team || '-'}</td>
+                        <td>${user.role.toUpperCase()}</td>
+                        <td>
+                            <button onclick="window.removeUser('${user.id}', '${user.username}')" 
+                                    style="background:none; border:none; color:var(--danger); cursor:pointer;">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            };
+
+            window.addNewUser = async function() {
+                const username = document.getElementById('new-username').value.trim().toLowerCase();
+                const name = document.getElementById('new-name').value;
+                const role = document.getElementById('new-role').value;
+                const team = document.getElementById('new-team').value;
+                
+                if (!username || !name) return alert('Preencha username e nome');
+
+                const internalEmail = `${username}@ti-claudino.internal`;
+
+                const { data, error } = await supabase.auth.admin.createUser({
+                    email: internalEmail,
+                    password: TEMP_PASSWORD,
+                    email_confirm: true,
+                    user_metadata: { 
+                        full_name: name, 
+                        username: username,
+                        role: role, 
+                        team: team 
+                    }
+                });
+                
+                if (error) {
+                    alert('Erro ao criar: ' + error.message);
+                } else {
+                    await supabase.from('profiles').insert([{
+                        id: data.user.id,
+                        email: internalEmail,
+                        username: username,
+                        full_name: name,
+                        role: role,
+                        team: team,
+                        must_change_password: true
+                    }]);
+                    
+                    alert(`✅ Usuário '${username}' criado!\n Senha inicial: ${TEMP_PASSWORD}\n O usuário deverá alterar no primeiro login.`);
+                    loadAllUsers();
+                    document.getElementById('new-username').value = '';
+                    document.getElementById('new-name').value = '';
+                }
+            };
+
+            window.removeUser = async function(userId, username) {
+                if (!confirm(`Remover usuário '${username}'?`)) return;
+                
+                await supabase.from('profiles').delete().eq('id', userId);
+                alert(`Usuário '${username}' removido dos perfis.`);
+                loadAllUsers();
+            };
+
+        }); // Fim do DOMContentLoaded
     </script>
 </body>
 </html>
