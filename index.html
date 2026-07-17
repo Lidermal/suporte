@@ -22,6 +22,7 @@
             --card-bg: rgba(17, 34, 64, 0.7);
             --success: #64ffda;
             --warning: #ffd700;
+            --danger: #ff6b6b;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
@@ -115,10 +116,7 @@
             box-shadow: 0 5px 20px rgba(0, 86, 179, 0.4);
         }
 
-        .btn-login:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-        }
+        .btn-login:disabled { opacity: 0.7; cursor: not-allowed; }
 
         /* APP PRINCIPAL */
         #app-container { display: none; height: 100%; flex-direction: column; }
@@ -252,11 +250,11 @@
     <!-- TELA DE LOGIN COM USUÁRIO E SENHA -->
     <div id="login-screen">
         <div class="login-container">
-            <img src="logo.png" alt="TI Claudino S/A" class="logo-img">
+            <img src="TI.png" alt="TI Claudino S/A" class="logo-img">
             
             <div class="input-group">
                 <label>USUÁRIO</label>
-                <input type="text" id="username" placeholder="Ex: lemos, didi, anna" autocomplete="off">
+                <input type="text" id="username" placeholder="Ex: lemos, didi, douglas" autocomplete="off">
             </div>
             
             <div class="input-group">
@@ -413,8 +411,9 @@
 
         let currentUser = null;
         let currentTripId = null;
+        const TEMP_PASSWORD = 'TiClaudino2024!';
 
-        // AUTENTICAÇÃO POR USERNAME
+        // AUTENTICAÇÃO POR USERNAME + PRIMEIRO ACESSO
         async function handleLogin() {
             const usernameInput = document.getElementById('username').value.trim().toLowerCase();
             const password = document.getElementById('password').value;
@@ -433,7 +432,7 @@
                 // Busca o email interno associado ao username
                 const { data: profile, error: searchError } = await supabase
                     .from('profiles')
-                    .select('email')
+                    .select('email, must_change_password')
                     .eq('username', usernameInput)
                     .single();
 
@@ -452,6 +451,33 @@
                 }
 
                 currentUser = data.user;
+                
+                // VERIFICA SE É PRIMEIRO ACESSO
+                if (profile.must_change_password && password === TEMP_PASSWORD) {
+                    document.getElementById('login-screen').innerHTML = `
+                        <div class="login-container">
+                            <img src="logo.png" alt="TI Claudino S/A" class="logo-img">
+                            <h3 style="color:var(--accent-cyan); margin-bottom:1rem;">PRIMEIRO ACESSO</h3>
+                            <p style="font-size:0.85rem; color:var(--text-grey); margin-bottom:1.5rem;">
+                                Defina sua nova senha pessoal.<br>Esta senha não poderá ser recuperada por e-mail.
+                            </p>
+                            <div class="input-group">
+                                <label>NOVA SENHA</label>
+                                <input type="password" id="new-password" placeholder="Mínimo 6 caracteres">
+                            </div>
+                            <div class="input-group">
+                                <label>CONFIRME A SENHA</label>
+                                <input type="password" id="confirm-password" placeholder="Repita a senha">
+                            </div>
+                            <button class="btn-login" onclick="changeFirstPassword('${profile.email}')">
+                                DEFINIR SENHA
+                            </button>
+                        </div>
+                    `;
+                    return; // Interrompe o carregamento do dashboard
+                }
+
+                // Login normal
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('app-container').style.display = 'flex';
                 loadUserData();
@@ -460,6 +486,30 @@
                 alert(err.message);
                 btn.innerHTML = originalText;
                 btn.disabled = false;
+            }
+        }
+
+        // Função para trocar senha no primeiro acesso
+        async function changeFirstPassword(email) {
+            const newPass = document.getElementById('new-password').value;
+            const confirmPass = document.getElementById('confirm-password').value;
+            
+            if (newPass.length < 6) return alert('Senha deve ter no mínimo 6 caracteres');
+            if (newPass !== confirmPass) return alert('As senhas não coincidem');
+            
+            // Atualiza senha no Auth
+            const { error } = await supabase.auth.updateUser({ password: newPass });
+            
+            if (error) {
+                alert('Erro ao atualizar senha: ' + error.message);
+            } else {
+                // Remove flag de primeiro acesso
+                await supabase.from('profiles')
+                    .update({ must_change_password: false })
+                    .eq('email', email);
+                    
+                alert('✅ Senha definida com sucesso! Redirecionando...');
+                location.reload(); // Recarrega para entrar normalmente
             }
         }
 
@@ -625,7 +675,7 @@
                     <td>${user.role.toUpperCase()}</td>
                     <td>
                         <button onclick="removeUser('${user.id}', '${user.username}')" 
-                                style="background:none; border:none; color:#ff6b6b; cursor:pointer;">
+                                style="background:none; border:none; color:var(--danger); cursor:pointer;">
                             <i class="fas fa-trash"></i>
                         </button>
                     </td>
@@ -639,7 +689,6 @@
             const name = document.getElementById('new-name').value;
             const role = document.getElementById('new-role').value;
             const team = document.getElementById('new-team').value;
-            const tempPass = 'TiClaudino2024!';
             
             if (!username || !name) return alert('Preencha username e nome');
 
@@ -648,7 +697,7 @@
 
             const { data, error } = await supabase.auth.admin.createUser({
                 email: internalEmail,
-                password: tempPass,
+                password: TEMP_PASSWORD,
                 email_confirm: true,
                 user_metadata: { 
                     full_name: name, 
@@ -667,10 +716,11 @@
                     username: username,
                     full_name: name,
                     role: role,
-                    team: team
+                    team: team,
+                    must_change_password: true // Flag de primeiro acesso
                 }]);
                 
-                alert(`✅ Usuário '${username}' criado!\n Senha temporária: ${tempPass}`);
+                alert(`✅ Usuário '${username}' criado!\n Senha inicial: ${TEMP_PASSWORD}\n O usuário deverá alterar no primeiro login.`);
                 loadAllUsers();
                 document.getElementById('new-username').value = '';
                 document.getElementById('new-name').value = '';
